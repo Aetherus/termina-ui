@@ -177,10 +177,12 @@ export default {
 
   methods: {
     destroyTerm(term) {
-      this.channel.push('-term', term)
-        .receive("ok", () => {
-          this.alert = {type: 'success', message: '词条删除成功'}
-        })
+      if (confirm("词条一旦删除无法恢复！你确定要删除？")) {
+        this.channel.push('-term', term)
+          .receive("ok", () => {
+            this.alert = {type: 'success', message: '词条删除成功'}
+          })
+      }
     },
     createTerm() {
       this.channel.push('+term', this.newTerm)

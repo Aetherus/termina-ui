@@ -79,6 +79,33 @@
             <template v-slot:item.actions="props">
               <div>
                 <v-btn text color="primary" :to="`/projects/${props.item.id}-${props.item.name}/terms`">词条</v-btn>
+
+                <v-dialog v-model="props.item._copyDialog" persistent>
+                  <template v-slot:activator="{on, attrs}">
+                    <v-btn text color="success" v-bind="attrs" v-on="on">复制</v-btn>
+                  </template>
+
+                  <v-card>
+                    <v-card-title>
+                      <span class="headline">复制 - {{props.item.name}}</span>
+                    </v-card-title>
+                    <v-card-text>
+                      <v-container>
+                        <v-row>
+                          <v-col cols="12">
+                            <v-text-field v-model="copiedProjectName" label="新项目名称" required/>
+                          </v-col>
+                        </v-row>
+                      </v-container>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer/>
+                      <v-btn color="primary" @click="props.item._copyDialog = false">取消</v-btn>
+                      <v-btn color="success" @click="copyProject(props.item)">复制</v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+
                 <v-btn text color="error" @click="destroyProject(props.item)">删除</v-btn>
               </div>
             </template>
@@ -106,6 +133,7 @@ export default {
       projects: [],
       selected: [],
       search: "",
+      copiedProjectName: null,
       alert: {
         type: 'success',
         message: null
@@ -140,6 +168,15 @@ export default {
           this.alert = {type: 'success', message: '项目修改成功'}
         })
         .receive("error", () => this.alert = {type: 'error', message: '项目名称已被使用'})
+    },
+    copyProject(project) {
+      this.channel.push('~project', {original_id: project.id, new_name: this.copiedProjectName})
+        .receive("ok", () => {
+          this.copiedProjectName = null
+          this.alert = {type: 'success', message: '项目复制成功'}
+        })
+        .receive("error", () => this.alert = {type: 'error', message: '项目名称已被使用'})
+      project._copyDialog = false;
     }
   },
 

@@ -149,10 +149,12 @@ export default {
 
   methods: {
     destroyProject(project) {
-      this.channel.push('-project', project)
-        .receive("ok", () => {
-          this.alert = {type: 'success', message: '项目删除成功'}
-        })
+      if (confirm("项目一旦删除无法恢复！你确定要删除？")) {
+        this.channel.push('-project', project)
+          .receive("ok", () => {
+            this.alert = {type: 'success', message: '项目删除成功'}
+          })
+      }
     },
     createProject() {
       this.channel.push('+project', this.newProject)

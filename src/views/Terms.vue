@@ -55,6 +55,9 @@
             :items="terms"
             item-key="id"
             :search="search"
+            disable-pagination
+            hide-default-footer
+            sort-by="english"
           >
             <template v-slot:item.english="props">
               <v-edit-dialog

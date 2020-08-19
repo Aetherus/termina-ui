@@ -45,6 +45,9 @@
             :items="projects"
             item-key="id"
             :search="search"
+            disable-pagination
+            hide-default-footer
+            sort-by="name"
           >
             <template v-slot:item.name="props">
               <v-edit-dialog

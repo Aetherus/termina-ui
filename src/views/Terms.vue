@@ -60,7 +60,10 @@
               <v-edit-dialog
                 :return-value.sync="props.item.english"
                 @save="updateTerm(props.item)"
-              >{{ props.item.english }}
+              >
+                <span style="text-decoration: underline dotted #1976d2">
+                  {{ props.item.english }}
+                </span>
                 <template v-slot:input>
                   <v-text-field
                     v-model="props.item.english"
@@ -75,7 +78,10 @@
               <v-edit-dialog
                 :return-value.sync="props.item.chinese"
                 @save="updateTerm(props.item)"
-              >{{ props.item.chinese }}
+              >
+                <span style="text-decoration: underline dotted #1976d2">
+                  {{ props.item.chinese }}
+                </span>
                 <template v-slot:input>
                   <v-text-field
                     v-model="props.item.chinese"
@@ -90,7 +96,10 @@
               <v-edit-dialog
                 :return-value.sync="props.item.part_of_speech"
                 @save="updateTerm(props.item)"
-              >{{ props.item.part_of_speech }}
+              >
+                <span style="text-decoration: underline dotted #1976d2">
+                  {{ props.item.part_of_speech }}
+                </span>
                 <template v-slot:input>
                   <v-select
                     v-model="props.item.part_of_speech"
@@ -104,7 +113,10 @@
               <v-edit-dialog
                 :return-value.sync="props.item.description"
                 @save="updateTerm(props.item)"
-              >{{ props.item.description }}
+              >
+                <span style="text-decoration: underline dotted #1976d2">
+                  {{ props.item.description }}
+                </span>
                 <template v-slot:input>
                   <v-text-field
                     v-model="props.item.description"
@@ -219,6 +231,7 @@ export default {
     this.channel.join()
                 .receive("ok", resp => this.terms = resp.terms)
 
+    this.channel.on('<terms', ({terms}) => this.terms = terms)
     this.channel.on('+term', term => this.terms.push(term))
     this.channel.on('-term', term => this.terms = this.terms.filter(t => t.id != term.id))
     this.channel.on('^term', term => {

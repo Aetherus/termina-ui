@@ -50,7 +50,10 @@
               <v-edit-dialog
                 :return-value.sync="props.item.name"
                 @save="updateProject(props.item)"
-              >{{ props.item.name }}
+              >
+                <span style="text-decoration: underline dotted #1976d2">
+                  {{ props.item.name }}
+                </span>
                 <template v-slot:input>
                   <v-text-field
                     v-model="props.item.name"
@@ -65,7 +68,10 @@
               <v-edit-dialog
                 :return-value.sync="props.item.description"
                 @save="updateProject(props.item)"
-              >{{ props.item.description }}
+              >
+                <span style="text-decoration: underline dotted #1976d2">
+                  {{ props.item.description }}
+                </span>
                 <template v-slot:input>
                   <v-text-field
                     v-model="props.item.description"
@@ -80,7 +86,46 @@
               <div>
                 <v-btn text color="primary" :to="`/projects/${props.item.id}-${props.item.name}/terms`">词条</v-btn>
 
-                <v-dialog v-model="props.item._copyDialog" persistent>
+                <v-dialog v-model="props.item._importDialog" persistent width="500">
+                  <template v-slot:activator="{on, attrs}">
+                    <v-btn text color="primary" v-bind="attrs" v-on="on">导入词条</v-btn>
+                  </template>
+
+                  <v-card>
+                    <v-card-title>
+                      <span class="headline">导入词条到{{props.item.name}}</span>
+                    </v-card-title>
+                    <v-card-text>
+                      <v-container>
+                        <v-row>
+                          <v-col cols="12">
+                            <v-autocomplete v-model="importParams.from" 
+                                            :items="projects" 
+                                            item-text="name"
+                                            item-value="id"
+                                            label="来源项目"/>
+                          </v-col>
+                        </v-row>
+                        <v-row>
+                          <v-col cols="12">
+                            <v-switch v-model="importParams.on_conflict" 
+                                      true-value="overwrite"
+                                      false-value="keep"
+                                      label="遇到冲突覆盖已存在的词条"/>
+                          </v-col>
+                        </v-row>
+                      </v-container>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer/>
+                      <v-btn color="primary" @click="props.item._importDialog = false">取消</v-btn>
+                      <v-btn color="success" @click="importTerms(props.item)">导入</v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+
+
+                <v-dialog v-model="props.item._copyDialog" persistent width="500">
                   <template v-slot:activator="{on, attrs}">
                     <v-btn text color="success" v-bind="attrs" v-on="on">复制</v-btn>
                   </template>
@@ -139,6 +184,11 @@ export default {
         message: null
       },
       errors: {},
+      importParams: {
+        from: null,
+        to: null,
+        on_conflict: 'keep'
+      },
       headers: [
         {text: '名称', value: 'name', sortable: true, align: 'start'},  
         {text: '描述', value: 'description', sortable: false, align: 'start'},
@@ -148,6 +198,17 @@ export default {
   },
 
   methods: {
+    importTerms(project) {
+      this.channel.push('<terms', {
+        from: this.importParams.from,
+        to: project.id,
+        on_conflict: this.importParams.on_conflict
+      }).receive("ok", () => {
+        this.alert = {type: 'success', message: '词条导入成功'}
+        this.importParams = {from: null, to: null, on_conflict: 'keep'}
+        project._importDialog = false
+      })
+    },
     destroyProject(project) {
       if (confirm("项目一旦删除无法恢复！你确定要删除？")) {
         this.channel.push('-project', project)
